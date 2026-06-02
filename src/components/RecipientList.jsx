@@ -175,7 +175,7 @@ export default function RecipientList({ recipients, onSelect, onUpdate, onDelete
             <>
               {/* Desktop Table View */}
               <div className="desktop-only" style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'separate', borderSpacing: 0 }}>
                   <thead>
                     <tr style={{ backgroundColor: 'var(--color-bg-subtle)' }}>
                       <th style={{ padding: '1rem 1.5rem' }}>대상자 정보</th>
