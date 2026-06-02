@@ -178,13 +178,13 @@ export default function RecipientList({ recipients, onSelect, onUpdate, onDelete
                 <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'separate', borderSpacing: 0 }}>
                   <thead>
                     <tr style={{ backgroundColor: 'var(--color-bg-subtle)' }}>
-                      <th style={{ padding: '1rem 1.5rem' }}>대상자 정보</th>
-                      <th style={{ padding: '1rem' }}>연락처 / 주소</th>
-                      <th style={{ padding: '1rem' }}>참고 메모</th>
-                      <th style={{ padding: '1rem' }}>최근 AI 판정</th>
-                      <th style={{ padding: '1rem' }}>스마트 자동 발신</th>
-                      <th style={{ padding: '1rem', textAlign: 'center' }}>수동 전화</th>
-                      <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>관리</th>
+                      <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>대상자 정보</th>
+                      <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>연락처 / 주소</th>
+                      <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>참고 메모</th>
+                      <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>최근 AI 판정</th>
+                      <th style={{ padding: '1rem', whiteSpace: 'nowrap' }}>스마트 자동 발신</th>
+                      <th style={{ padding: '1rem', textAlign: 'center', whiteSpace: 'nowrap' }}>수동 전화</th>
+                      <th style={{ padding: '1rem 1.5rem', textAlign: 'right', whiteSpace: 'nowrap' }}>관리</th>
                     </tr>
                   </thead>
                   <tbody>
