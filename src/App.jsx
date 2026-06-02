@@ -345,7 +345,7 @@ function App() {
     </div>
   );
 
-  // if (!cognitoUser) return <LoginScreen />;
+  if (!cognitoUser) return <LoginScreen />;
 
   const pageTitle = currentView === 'myAccount' ? '내 계정' : activeTab;
 
