@@ -175,7 +175,7 @@ export default function RecipientList({ recipients, onSelect, onUpdate, onDelete
             <>
               {/* Desktop Table View */}
               <div className="desktop-only" style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'separate', borderSpacing: 0 }}>
+                <table style={{ width: '100%', minWidth: '1050px', borderCollapse: 'separate', borderSpacing: 0 }}>
                   <thead>
                     <tr style={{ backgroundColor: 'var(--color-bg-subtle)' }}>
                       <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>대상자 정보</th>
@@ -200,8 +200,8 @@ export default function RecipientList({ recipients, onSelect, onUpdate, onDelete
                               <img src={r.photo || DEFAULT_AVATAR} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
                             <div>
-                              <div style={{ fontWeight: 700, color: 'var(--color-text-main)', fontSize: '1rem' }}>{r.name}</div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.125rem' }}>만 {r.age}세</div>
+                              <div style={{ fontWeight: 700, color: 'var(--color-text-main)', fontSize: '1rem', whiteSpace: 'nowrap' }}>{r.name}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.125rem', whiteSpace: 'nowrap' }}>만 {r.age}세</div>
                             </div>
                           </div>
                         </td>
@@ -300,7 +300,7 @@ export default function RecipientList({ recipients, onSelect, onUpdate, onDelete
                         </td>
 
                         {/* 관리 */}
-                        <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>
+                        <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
                           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <button
                               className="btn btn-primary"
