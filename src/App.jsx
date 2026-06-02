@@ -7,40 +7,26 @@ import StatsPanel from './components/StatsPanel';
 import MyAccountScreen from './components/admin/MyAccountScreen';
 import { fetchRecipients, fetchTodayCallStatus, fetchCallHistory, createRecipient, updateRecipient } from './api/dashboardApi';
 import { ADMIN_ACCOUNTS } from './components/admin/adminMockData';
-// import { signIn, signOut, getCurrentSession } from './auth/cognitoAuth'; // Direct Auth (주석처리)
-import { userManager, signOutRedirect } from './auth/userManager'; // OIDC
+import { userManager, signOutRedirect } from './auth/userManager';
 
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-  }
-
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, errorInfo) { console.error('ErrorBoundary:', error, errorInfo); }
   render() {
     if (this.state.hasError) {
       return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-body)', padding: '2rem' }}>
           <div className="card" style={{ maxWidth: '28rem', textAlign: 'center', padding: '3rem 2rem' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>&#9888;&#65039;</div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '0.75rem' }}>
-              문제가 발생했습니다
-            </h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '0.75rem' }}>문제가 발생했습니다</h2>
             <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
               {this.state.error?.message || '예기치 않은 오류가 발생했습니다. 페이지를 새로고침해주세요.'}
             </p>
-            <button
-              className="btn btn-primary"
-              style={{ padding: '0.75rem 2rem' }}
-              onClick={() => window.location.reload()}
-            >
+            <button className="btn btn-primary" style={{ padding: '0.75rem 2rem' }} onClick={() => window.location.reload()}>
               페이지 새로고침
             </button>
           </div>
@@ -51,84 +37,196 @@ class ErrorBoundary extends Component {
   }
 }
 
-const DASHBOARD_TABS = ['위험도 현황', '대상자 목록', '통계'];
-
-const APP_VIEWS = [
-  { id: 'dashboard', label: '대시보드' },
-  { id: 'myAccount', label: '내 계정' },
-];
-
 function getAvatarLabel(name, email) {
   return (name?.trim()?.[0] || email?.trim()?.[0] || 'A').toUpperCase();
 }
 
-/* --- Direct Auth LoginScreen (주석처리) ---
-function LoginScreen({ onLogin }) { ... }
---- */
+// ── SVG Icons ──────────────────────────────────────────────────────────────────
+function ShieldIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  );
+}
 
+function UsersIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  );
+}
+
+function BarChartIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
+      <line x1="2" y1="20" x2="22" y2="20"/>
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+      <polyline points="16 17 21 12 16 7"/>
+      <line x1="21" y1="12" x2="9" y2="12"/>
+    </svg>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  );
+}
+
+// ── Login Screen ───────────────────────────────────────────────────────────────
 function LoginScreen() {
   return (
     <div className="login-page">
-      <div className="login-card">
-        <div className="login-header">
-          <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-primary)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: 'var(--shadow-lg)' }}>
-            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.5rem' }}>AI</span>
+      <div className="login-left">
+        <div className="login-brand">
+          <div className="login-brand-icon">
+            <svg viewBox="0 0 24 24" fill="white" width="26" height="26">
+              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+            </svg>
           </div>
-          <h1 className="login-title">CareCall</h1>
-          <p className="login-subtitle">관리자 통합 대시보드</p>
+          <h1 className="login-brand-title">CareCall</h1>
+          <p className="login-brand-desc">
+            AI 기반 어르신 안부 전화 시스템입니다.<br />
+            내부 관리자 전용 시스템으로,<br />
+            권한 없는 접근은 기록됩니다.
+          </p>
+          <ul className="login-feature-list">
+            <li>실시간 위험도 모니터링</li>
+            <li>AI 감정 분석 통화 이력</li>
+            <li>대상자 관리 및 자동 발신</li>
+          </ul>
         </div>
-        <button
-          className="btn btn-primary"
-          style={{ width: '100%', padding: '0.75rem', marginTop: '1.5rem' }}
-          onClick={() => userManager.signinRedirect()}
-        >
-          로그인
-        </button>
+      </div>
+
+      <div className="login-right">
+        <div className="login-form-card">
+          <div className="login-form-header">
+            <h2 className="login-form-title">로그인</h2>
+            <p className="login-form-subtitle">계정 정보를 입력해주세요</p>
+          </div>
+          <div className="login-form-body">
+            <button className="btn btn-primary login-submit-btn" onClick={() => userManager.signinRedirect()}>
+              로그인
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function AccountMenu({ currentUser, currentView, onNavigate, onLogout }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef(null);
+// ── Sidebar ────────────────────────────────────────────────────────────────────
+const SIDEBAR_ITEMS = [
+  { id: 'risk',       label: '위험도 현황', view: 'dashboard', tab: '위험도 현황', Icon: ShieldIcon },
+  { id: 'recipients', label: '대상자 목록', view: 'dashboard', tab: '대상자 목록', Icon: UsersIcon },
+  { id: 'stats',      label: '통계',        view: 'dashboard', tab: '통계',        Icon: BarChartIcon },
+];
 
-  useEffect(() => {
-    function handlePointerDown(e) { if (menuRef.current && !menuRef.current.contains(e.target)) setIsOpen(false); }
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, []);
+function Sidebar({ currentView, activeTab, onNavigate, currentUser, onLogout, isMobileOpen, onMobileClose }) {
+  const isActive = (item) =>
+    item.view === 'myAccount'
+      ? currentView === 'myAccount'
+      : currentView === 'dashboard' && activeTab === item.tab;
 
   return (
-    <div ref={menuRef} style={{ position: 'relative' }}>
-      <button className="btn btn-outline" aria-label="계정 메뉴" aria-expanded={isOpen} aria-haspopup="true" style={{ padding: '0.375rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderRadius: 'var(--radius-lg)' }} onClick={() => setIsOpen(!isOpen)}>
-        <div style={{ width: '28px', height: '28px', backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.75rem', overflow: 'hidden' }}>
-          {currentUser.photo ? <img src={currentUser.photo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : getAvatarLabel(currentUser.name, currentUser.email)}
-        </div>
-        <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{currentUser.name}</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-
-      {isOpen && (
-        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', width: '240px', backgroundColor: 'var(--color-bg-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--color-border)', padding: '0.5rem', zIndex: 100 }}>
-          <div style={{ padding: '0.75rem', borderBottom: '1px solid var(--color-border)', marginBottom: '0.5rem' }}>
-            <p style={{ fontWeight: 700, color: 'var(--color-text-main)', fontSize: '0.875rem', margin: 0 }}>{currentUser.name}</p>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', margin: '0.25rem 0 0' }}>{currentUser.email}</p>
+    <>
+      {isMobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
+      <aside className={`sidebar${isMobileOpen ? ' sidebar-open' : ''}`}>
+        <div className="sidebar-logo">
+          <div className="sidebar-logo-icon">
+            <svg viewBox="0 0 24 24" fill="white" width="16" height="16">
+              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+            </svg>
           </div>
-          {APP_VIEWS.map((view) => (
-            <button key={view.id} className="btn btn-ghost" style={{ justifyContent: 'flex-start', width: '100%', fontSize: '0.875rem', color: currentView === view.id ? 'var(--color-primary)' : 'var(--color-text-main)', backgroundColor: currentView === view.id ? 'var(--color-bg-subtle)' : 'transparent' }} onClick={() => { onNavigate(view.id); setIsOpen(false); }}>
-              {view.label}
+          <span className="sidebar-logo-text">CareCall</span>
+          <button className="sidebar-close-btn mobile-only" onClick={onMobileClose} aria-label="메뉴 닫기">
+            <XIcon />
+          </button>
+        </div>
+
+        <nav className="sidebar-nav" aria-label="주요 메뉴">
+          <p className="sidebar-section-label">메인 메뉴</p>
+          {SIDEBAR_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              className={`sidebar-item${isActive(item) ? ' active' : ''}`}
+              onClick={() => { onNavigate(item.view, item.tab); onMobileClose(); }}
+            >
+              <item.Icon />
+              <span>{item.label}</span>
             </button>
           ))}
-          <div style={{ borderTop: '1px solid var(--color-border)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
-            <button className="btn btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', color: 'var(--color-danger)', fontSize: '0.875rem' }} onClick={onLogout}>로그아웃</button>
+
+          <p className="sidebar-section-label" style={{ marginTop: '1.5rem' }}>계정</p>
+          <button
+            className={`sidebar-item${currentView === 'myAccount' ? ' active' : ''}`}
+            onClick={() => { onNavigate('myAccount', null); onMobileClose(); }}
+          >
+            <UserIcon />
+            <span>내 계정</span>
+          </button>
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="sidebar-user-row">
+            <div className="sidebar-avatar">
+              {currentUser.photo
+                ? <img src={currentUser.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                : getAvatarLabel(currentUser.name, currentUser.email)
+              }
+            </div>
+            <div className="sidebar-user-info">
+              <p className="sidebar-user-name">{currentUser.name}</p>
+              <p className="sidebar-user-email">{currentUser.email}</p>
+            </div>
+            <button className="sidebar-logout" onClick={onLogout} aria-label="로그아웃" title="로그아웃">
+              <LogoutIcon />
+            </button>
           </div>
         </div>
-      )}
-    </div>
+      </aside>
+    </>
   );
 }
 
+// ── App ────────────────────────────────────────────────────────────────────────
 function App() {
   const [cognitoUser, setCognitoUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -137,7 +235,7 @@ function App() {
   const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [callHistory, setCallHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [adminAccounts, setAdminAccounts] = useState(ADMIN_ACCOUNTS);
+  const [adminAccounts] = useState(ADMIN_ACCOUNTS);
   const [recipients, setRecipients] = useState([]);
   const [todayStatus, setTodayStatus] = useState({ date: null, total: 0, riskCounts: { 정상: 0, 주의: 0, 위험: 0, 미응답: 0 } });
   const [todayRecords, setTodayRecords] = useState([]);
@@ -146,6 +244,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [dashboardFilter, setDashboardFilter] = useState('전체');
   const [toast, setToast] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' })
   );
@@ -218,21 +317,15 @@ function App() {
     return { ...r, phoneNumber: recipient?.phoneNumber || '' };
   }), [todayRecords, dashboardFilter, recipients]);
 
-  if (authLoading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-body)' }}>
-      <div style={{ width: '36px', height: '36px', border: '3px solid var(--color-border)', borderTopColor: 'var(--color-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-    </div>
-  );
-  if (!cognitoUser) return <LoginScreen />;
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    if (tab === '대상자 목록') {
-      setDashboardFilter('전체');
+  const handleNavigate = useCallback((view, tab) => {
+    setCurrentView(view);
+    if (tab) {
+      setActiveTab(tab);
+      if (tab === '대상자 목록') setDashboardFilter('전체');
     }
-  };
+  }, []);
 
-  const handleRecipientSelect = async (r) => {
+  const handleRecipientSelect = useCallback(async (r) => {
     setCallHistory([]);
     setHistoryLoading(true);
     setSelectedRecipient(r);
@@ -244,152 +337,139 @@ function App() {
     } finally {
       setHistoryLoading(false);
     }
-  };
+  }, []);
+
+  if (authLoading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-body)' }}>
+      <div style={{ width: '36px', height: '36px', border: '3px solid var(--color-border)', borderTopColor: 'var(--color-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    </div>
+  );
+
+  // if (!cognitoUser) return <LoginScreen />;
+
+  const pageTitle = currentView === 'myAccount' ? '내 계정' : activeTab;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {toast && (
-        <div style={{
-          position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 2000,
-          backgroundColor: 'var(--color-text-main)', color: 'white',
-          padding: '0.875rem 1.25rem', borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-lg)', fontSize: '0.875rem', fontWeight: 500,
-          display: 'flex', alignItems: 'center', gap: '0.625rem',
-          animation: 'slideUp 0.3s ease-out',
-        }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          {toast}
-        </div>
-      )}
-      <header className="app-header glass">
-        <div className="container app-header-content">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => { setCurrentView('dashboard'); setDashboardFilter('전체'); setActiveTab('위험도 현황'); }}>
-              <div style={{ width: '32px', height: '32px', backgroundColor: 'var(--color-primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(79, 70, 229, 0.3)' }}>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>AI</span>
-              </div>
-              <h1 className="app-title" style={{ fontSize: '1.25rem', letterSpacing: '-0.02em' }}>CareCall</h1>
-            </div>
+    <div className="app-layout">
+      <Sidebar
+        currentView={currentView}
+        activeTab={activeTab}
+        onNavigate={handleNavigate}
+        currentUser={currentUser}
+        onLogout={signOutRedirect}
+        isMobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
+      />
 
-            <div className="tabs desktop-only" style={{ marginBottom: 0, borderBottom: 'none' }}>
-                {DASHBOARD_TABS.map((tab) => (
-                  <button key={tab} className={`tab ${currentView === 'dashboard' && activeTab === tab ? 'active' : ''}`} style={{ padding: '1.25rem 0' }} onClick={() => { setCurrentView('dashboard'); handleTabChange(tab); }}>
-                    {tab}
-                  </button>
-                ))}
-              </div>
-              <select className="mobile-only form-input" style={{ width: 'auto', fontSize: '0.875rem', padding: '0.5rem 0.75rem' }} value={activeTab} onChange={(e) => { setCurrentView('dashboard'); handleTabChange(e.target.value); }}>
-                {DASHBOARD_TABS.map((tab) => (
-                  <option key={tab} value={tab}>{tab}</option>
-                ))}
-              </select>
+      <div className="main-area">
+        <header className="top-bar glass">
+          <div className="top-bar-left">
+            <button className="hamburger-btn mobile-only" onClick={() => setSidebarOpen(true)} aria-label="메뉴 열기">
+              <MenuIcon />
+            </button>
+            <div className="desktop-only top-bar-page-info">
+              <h2 className="top-bar-title">{pageTitle}</h2>
+              {activeTab === '위험도 현황' && currentView === 'dashboard' && (
+                <span className="top-bar-date">{selectedDate} 기준</span>
+              )}
+            </div>
+            <span className="mobile-only top-bar-mobile-title">{pageTitle}</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <svg
-                style={{ position: 'absolute', left: '0.875rem', color: 'var(--color-text-light)', pointerEvents: 'none' }}
-                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <div className="top-bar-right">
+            <div className="search-wrapper desktop-only">
+              <svg className="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
               <input
                 type="text"
-                className="form-input"
+                className="form-input search-input"
                 placeholder="대상자 검색..."
-                style={{ width: '240px', paddingLeft: '2.75rem', backgroundColor: 'var(--color-bg-subtle)', border: '1px solid var(--color-border)' }}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <AccountMenu currentUser={currentUser} currentView={currentView} onNavigate={setCurrentView} onLogout={signOutRedirect} />
           </div>
-        </div>
-      </header>
+        </header>
 
-      {apiError && (
-        <div style={{ backgroundColor: '#fef3c7', borderBottom: '1px solid #fcd34d', padding: '0.625rem 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: '#92400e', fontWeight: 600 }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          서버에 연결할 수 없습니다. AWS 연결 상태를 확인해주세요.
-        </div>
-      )}
+        {apiError && (
+          <div className="api-error-banner">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            서버에 연결할 수 없습니다. AWS 연결 상태를 확인해주세요.
+          </div>
+        )}
 
-      <div style={{ flex: 1, backgroundColor: 'var(--color-bg-body)' }}>
-        <div className="container" style={{ padding: '2.5rem 2rem' }}>
+        <main className="content-area">
           {currentView === 'dashboard' ? (
-             activeTab === '위험도 현황' ? (
-               <RiskStatusPanel
-                  todayStatus={todayStatus}
-                  atRiskList={filteredTodayRecords}
-                  activeFilter={dashboardFilter}
-                  onFilterChange={setDashboardFilter}
-                  selectedDate={selectedDate}
-                  onDateChange={handleDateChange}
-                  onRecipientSelect={(name) => {
-                    const recipient = recipients.find(r => r.name === name);
-                    if (recipient) handleRecipientSelect(recipient);
-                  }}
-                  currentAdmin={currentUser}
-                  onCorrectionSaved={(recipientId, newRiskLevel) => {
-                    setRecipients(prev => prev.map(r =>
-                      r.recipientId === recipientId ? { ...r, lastRiskLevel: newRiskLevel } : r
-                    ));
-                    setTodayRecords(prev => prev.map(r =>
-                      r.recipientId === recipientId ? { ...r, riskLevel: newRiskLevel } : r
-                    ));
-                  }}
-               />
-             ) : activeTab === '통계' ? (
-               <StatsPanel />
-             ) : (
-               <RecipientList
-                 recipients={filteredRecipients}
-                 isLoading={isLoading}
-                 onSelect={handleRecipientSelect}
-                 onAdd={async (r) => {
-                   try {
-                     await createRecipient(r);
-                     const updated = await fetchRecipients();
-                     setRecipients(updated);
-                     showToast(`${r.name}님이 등록되었습니다.`);
-                   } catch (err) {
-                     console.error('대상자 등록 실패:', err);
-                     showToast(`등록 실패: ${err.message}`);
-                   }
-                 }}
-                 onUpdate={async (r) => {
-                   try {
-                     await updateRecipient(r.recipientId, {
-                       recipientName: r.name,
-                       age: r.age,
-                       phoneNumber: r.phoneNumber,
-                       address: r.address,
-                       memo: r.memo,
-                       autoCallTime: r.autoCallTime,
-                       autoCallEnabled: r.autoCallEnabled,
-                     });
-                     setRecipients(prev => prev.map(i => i.recipientId === r.recipientId ? { ...i, ...r } : i));
-                     showToast(`${r.name}님 정보가 수정되었습니다.`);
-                   } catch (err) {
-                     console.error('대상자 수정 실패:', err);
-                     showToast(`수정 실패: ${err.message}`);
-                   }
-                 }}
-                 onDelete={(id) => setRecipients(recipients.filter(r => r.recipientId !== id))}
-                 onManualCall={(r) => console.log(`수동 발신 요청: ${r.name} (${r.phoneNumber})`)}
-               />
-             )
-          ) : (
-             currentView === 'adminAccounts' ? null :
-             currentView === 'myAccount' ? <MyAccountScreen user={currentUser} onSaveProfile={() => {}} onChangePassword={() => {}} /> :
-             null
-          )}
-        </div>
+            activeTab === '위험도 현황' ? (
+              <RiskStatusPanel
+                todayStatus={todayStatus}
+                atRiskList={filteredTodayRecords}
+                activeFilter={dashboardFilter}
+                onFilterChange={setDashboardFilter}
+                selectedDate={selectedDate}
+                onDateChange={handleDateChange}
+                onRecipientSelect={(name) => {
+                  const recipient = recipients.find(r => r.name === name);
+                  if (recipient) handleRecipientSelect(recipient);
+                }}
+                currentAdmin={currentUser}
+                onCorrectionSaved={(recipientId, newRiskLevel) => {
+                  setRecipients(prev => prev.map(r =>
+                    r.recipientId === recipientId ? { ...r, lastRiskLevel: newRiskLevel } : r
+                  ));
+                  setTodayRecords(prev => prev.map(r =>
+                    r.recipientId === recipientId ? { ...r, riskLevel: newRiskLevel } : r
+                  ));
+                }}
+              />
+            ) : activeTab === '통계' ? (
+              <StatsPanel />
+            ) : (
+              <RecipientList
+                recipients={filteredRecipients}
+                isLoading={isLoading}
+                onSelect={handleRecipientSelect}
+                onAdd={async (r) => {
+                  try {
+                    await createRecipient(r);
+                    const updated = await fetchRecipients();
+                    setRecipients(updated);
+                    showToast(`${r.name}님이 등록되었습니다.`);
+                  } catch (err) {
+                    console.error('대상자 등록 실패:', err);
+                    showToast(`등록 실패: ${err.message}`);
+                  }
+                }}
+                onUpdate={async (r) => {
+                  try {
+                    await updateRecipient(r.recipientId, {
+                      recipientName: r.name,
+                      age: r.age,
+                      phoneNumber: r.phoneNumber,
+                      address: r.address,
+                      memo: r.memo,
+                      autoCallTime: r.autoCallTime,
+                      autoCallEnabled: r.autoCallEnabled,
+                    });
+                    setRecipients(prev => prev.map(i => i.recipientId === r.recipientId ? { ...i, ...r } : i));
+                    showToast(`${r.name}님 정보가 수정되었습니다.`);
+                  } catch (err) {
+                    console.error('대상자 수정 실패:', err);
+                    showToast(`수정 실패: ${err.message}`);
+                  }
+                }}
+                onDelete={(id) => setRecipients(recipients.filter(r => r.recipientId !== id))}
+                onManualCall={(r) => console.log(`수동 발신 요청: ${r.name} (${r.phoneNumber})`)}
+              />
+            )
+          ) : currentView === 'myAccount' ? (
+            <MyAccountScreen user={currentUser} onSaveProfile={() => {}} onChangePassword={() => {}} />
+          ) : null}
+        </main>
       </div>
 
       {selectedRecipient && (
@@ -400,6 +480,15 @@ function App() {
           recipientPhoto={selectedRecipient.photo}
           onClose={() => setSelectedRecipient(null)}
         />
+      )}
+
+      {toast && (
+        <div className="toast">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          {toast}
+        </div>
       )}
     </div>
   );

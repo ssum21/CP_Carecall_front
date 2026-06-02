@@ -261,7 +261,7 @@ function TodayStatusCards({ todayStatus, activeFilter, onFilterChange, selectedD
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', minWidth: 0 }}>
         {cards.map(({ type, count }) => {
           const config = RISK_CONFIG[type];
           const isActive = activeFilter === type;
