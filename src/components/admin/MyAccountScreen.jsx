@@ -75,8 +75,6 @@ function MyAccountScreen({ user, onSaveProfile, onChangePassword }) {
     }
   }
 
-  const permissionsCount = user.permissions?.length || 0;
-
   const passwordStrength = useMemo(() => {
     const password = passwordForm.nextPassword;
     if (!password) return null;
@@ -185,26 +183,6 @@ function MyAccountScreen({ user, onSaveProfile, onChangePassword }) {
         </div>
       </div>
 
-      {/* Statistics Bar */}
-      <div className="detail-grid" style={{ marginBottom: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-        <div className="content-surface" style={{ padding: '1.25rem' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            최근 접속
-          </div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-            {user.lastAccess || '오늘'}
-          </div>
-        </div>
-        <div className="content-surface" style={{ padding: '1.25rem' }}>
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            보유 권한
-          </div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-            {permissionsCount}
-          </div>
-        </div>
-      </div>
-
       {/* Single Column Stack Layout */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* Section 1: Profile Edit Form */}
@@ -304,21 +282,7 @@ function MyAccountScreen({ user, onSaveProfile, onChangePassword }) {
           </form>
         </div>
 
-        {/* Section 2: Permissions */}
-        <div className="content-surface">
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-            보유 권한 ({permissionsCount})
-          </div>
-          <div className="chip-list">
-            {user.permissions.map((permission) => (
-              <span key={permission} className="chip-token">
-                {permission}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Section 3: Password Change (Expandable) */}
+        {/* Section 2: Password Change (Expandable) */}
         <div className="content-surface" style={{ borderTop: '2px solid var(--color-border)', paddingTop: '1.5rem' }}>
           {!isPasswordSectionExpanded ? (
             <button
