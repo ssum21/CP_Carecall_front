@@ -403,8 +403,8 @@ tbody tr:hover {
 .login-left {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 4rem 3rem;
+  justify-content: flex-end;
+  padding: 4rem 2.5rem 4rem 4rem;
 }
 
 .login-brand {
@@ -466,8 +466,8 @@ tbody tr:hover {
 .login-right {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 2rem 4rem 2rem 2rem;
+  justify-content: flex-start;
+  padding: 2rem 4rem 2rem 2.5rem;
 }
 
 .login-form-card {
