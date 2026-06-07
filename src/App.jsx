@@ -464,11 +464,12 @@ function App() {
                 }}
                 onDelete={async (id) => {
                     const target = recipients.find(r => r.recipientId === id);
+                    setRecipients(prev => prev.filter(r => r.recipientId !== id));
                     try {
                       await deleteRecipient(id);
-                      setRecipients(prev => prev.filter(r => r.recipientId !== id));
                       showToast(`${target?.name || '대상자'}님이 삭제되었습니다.`);
                     } catch (err) {
+                      setRecipients(prev => [...prev, target]);
                       showToast(`삭제 실패: ${err.message}`);
                     }
                   }}

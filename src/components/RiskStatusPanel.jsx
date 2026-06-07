@@ -557,7 +557,7 @@ function AtRiskList({ atRiskList, activeFilter, onRecipientSelect, onFilterChang
                         {r.callTime ? new Date(r.callTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </td>
                       <td style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', fontWeight: 600 }}>
-                        {r.duration != null ? `${r.duration}분` : '-'}
+                        {r.duration != null ? (r.duration < 60 ? `${r.duration}초` : `${Math.floor(r.duration / 60)}분 ${r.duration % 60 > 0 ? `${r.duration % 60}초` : ''}`.trim()) : '-'}
                       </td>
                       <td style={{ maxWidth: '260px', fontSize: '0.875rem', fontWeight: 600, color: isUrgent ? 'var(--color-text-main)' : 'var(--color-text-muted)' }}>
                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
