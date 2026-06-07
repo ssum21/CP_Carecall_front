@@ -39,7 +39,7 @@ function SentimentLineChart({ history, isLoading, error }) {
   const latest = scores[scores.length - 1];
   const trendDiff = latest - scores[scores.length - 2];
   const zc = s => s >= 70 ? '#10b981' : s >= 40 ? '#f59e0b' : '#ef4444';
-  const lineColor = zc(latest);
+  const lineColor = '#94a3b8';
 
   const gx = i => PL + (i / (data.length - 1)) * cW;
   const gy = s => PT + cH * (1 - s / 100);
