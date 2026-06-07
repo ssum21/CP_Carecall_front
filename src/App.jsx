@@ -5,7 +5,7 @@ import RiskStatusPanel from './components/RiskStatusPanel';
 import AdminAccountsScreen from './components/admin/AdminAccountsScreen';
 import StatsPanel from './components/StatsPanel';
 import MyAccountScreen from './components/admin/MyAccountScreen';
-import { fetchRecipients, fetchTodayCallStatus, fetchCallHistory, createRecipient, updateRecipient } from './api/dashboardApi';
+import { fetchRecipients, fetchTodayCallStatus, fetchCallHistory, createRecipient, updateRecipient, deleteRecipient } from './api/dashboardApi';
 import { ADMIN_ACCOUNTS } from './components/admin/adminMockData';
 import { userManager, signOutRedirect } from './auth/userManager';
 
@@ -462,7 +462,16 @@ function App() {
                     showToast(`수정 실패: ${err.message}`);
                   }
                 }}
-                onDelete={(id) => setRecipients(recipients.filter(r => r.recipientId !== id))}
+                onDelete={async (id) => {
+                    const target = recipients.find(r => r.recipientId === id);
+                    try {
+                      await deleteRecipient(id);
+                      setRecipients(prev => prev.filter(r => r.recipientId !== id));
+                      showToast(`${target?.name || '대상자'}님이 삭제되었습니다.`);
+                    } catch (err) {
+                      showToast(`삭제 실패: ${err.message}`);
+                    }
+                  }}
                 onManualCall={(r) => console.log(`수동 발신 요청: ${r.name} (${r.phoneNumber})`)}
               />
             )

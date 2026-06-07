@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getRecordingPresignedUrl } from '../api/dashboardApi';
 
 const RISK_COLORS = {
   위험: 'var(--color-danger)',
@@ -117,6 +118,102 @@ function SentimentLineChart({ history, isLoading, error }) {
   );
 }
 
+function RecordingPlayer({ recordingS3Key, recordingS3Bucket }) {
+  const [url, setUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [downloadErrorMsg, setDownloadErrorMsg] = useState(null);
+
+  useEffect(() => {
+    if (!recordingS3Key) return;
+    setLoading(true);
+    setErrorMsg(null);
+    getRecordingPresignedUrl(recordingS3Key, recordingS3Bucket)
+      .then(data => setUrl(data.url))
+      .catch(err => setErrorMsg(err.message || '녹음 파일을 불러올 수 없습니다.'))
+      .finally(() => setLoading(false));
+  }, [recordingS3Key, recordingS3Bucket]);
+
+  const handleDownload = async () => {
+    setDownloadErrorMsg(null);
+    try {
+      const data = await getRecordingPresignedUrl(recordingS3Key, recordingS3Bucket, true);
+      window.open(data.url, '_blank');
+    } catch (err) {
+      setDownloadErrorMsg(err.message || '다운로드 링크 발급에 실패했습니다.');
+      setTimeout(() => setDownloadErrorMsg(null), 4000);
+    }
+  };
+
+  return (
+    <div style={{
+      padding: '0.875rem 1.5rem',
+      borderBottom: '1px solid var(--color-border)',
+      backgroundColor: 'var(--color-bg-subtle)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+    }}>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+      <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--color-text-main)', flexShrink: 0 }}>통화 녹음</span>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {loading && (
+          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>불러오는 중...</div>
+        )}
+        {errorMsg && (
+          <div style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 600 }}>{errorMsg}</div>
+        )}
+        {downloadErrorMsg && (
+          <div style={{ fontSize: '0.75rem', color: 'var(--color-danger)', fontWeight: 600 }}>{downloadErrorMsg}</div>
+        )}
+        {url && !loading && !errorMsg && (
+          <audio
+            src={url}
+            controls
+            style={{ width: '100%', height: '32px', accentColor: 'var(--color-primary)' }}
+            onError={() => setErrorMsg('재생 중 오류가 발생했습니다. 파일이 만료되었을 수 있습니다.')}
+          />
+        )}
+      </div>
+
+      {url && !errorMsg && (
+        <button
+          onClick={handleDownload}
+          title="녹음 파일 다운로드"
+          aria-label="녹음 파일 다운로드"
+          style={{
+            flexShrink: 0,
+            padding: '0.375rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border-dark)',
+            backgroundColor: 'transparent',
+            cursor: 'pointer',
+            color: 'var(--color-text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border-dark)'; e.currentTarget.style.color = 'var(--color-text-muted)'; }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ChatView({ record, recipientName, onBack }) {
   return (
     <div style={{ animation: 'fadeIn 0.3s ease-out', display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--color-bg-body)' }}>
@@ -131,6 +228,10 @@ function ChatView({ record, recipientName, onBack }) {
           <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: 0 }}>{recipientName} 님과의 통화 전문</p>
         </div>
       </div>
+
+      {record.recordingS3Key && (
+        <RecordingPlayer recordingS3Key={record.recordingS3Key} recordingS3Bucket={record.recordingS3Bucket} />
+      )}
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div style={{ alignSelf: 'center', backgroundColor: 'var(--color-bg-surface)', padding: '0.5rem 1.25rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', border: '1px solid var(--color-border)', marginBottom: '1rem' }}>

@@ -74,3 +74,14 @@ export async function fetchCorrectionStats(day) {
   const query = day ? `?day=${day}` : '';
   return apiFetch(`/calls/corrections/stats${query}`);
 }
+
+export async function deleteRecipient(recipientId) {
+  return apiFetch(`/recipients/${recipientId}`, { method: 'DELETE' });
+}
+
+export async function getRecordingPresignedUrl(key, bucket, download = false) {
+  const params = new URLSearchParams({ key });
+  if (bucket) params.append('bucket', bucket);
+  if (download) params.append('download', 'true');
+  return apiFetch(`/recordings/url?${params}`);
+}
