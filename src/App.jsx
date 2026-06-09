@@ -117,9 +117,7 @@ function LoginScreen() {
       <div className="login-left">
         <div className="login-brand">
           <div className="login-brand-icon">
-            <svg viewBox="0 0 24 24" fill="white" width="26" height="26">
-              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
-            </svg>
+            <img src="/carecall-logo.png" alt="CareCall 로고" width="56" height="56" />
           </div>
           <h1 className="login-brand-title">CareCall</h1>
           <p className="login-brand-desc">
@@ -171,9 +169,7 @@ function Sidebar({ currentView, activeTab, onNavigate, currentUser, onLogout, is
       <aside className={`sidebar${isMobileOpen ? ' sidebar-open' : ''}`}>
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
-            <svg viewBox="0 0 24 24" fill="white" width="16" height="16">
-              <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
-            </svg>
+            <img src="/carecall-logo.png" alt="CareCall 로고" width="30" height="30" />
           </div>
           <span className="sidebar-logo-text">CareCall</span>
           <button className="sidebar-close-btn mobile-only" onClick={onMobileClose} aria-label="메뉴 닫기">
